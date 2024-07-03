@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACADEMIA CORTEX - Combinación de Alimentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .food-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.selected {
+            background-color: #2196F3;
+        }
+        #result, #multiResult, #specificFoods {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .combination {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .buena { background-color: #90EE90; }
+        .regular { background-color: #FFFFE0; }
+        .mala { background-color: #FFB6C1; }
+        .terrible { background-color: #A9A9A9; color: white; }
+        .food-list {
+            columns: 2;
+            -webkit-columns: 2;
+            -moz-columns: 2;
+        }
+    </style>
+</head>
+<body>
+    <h1>ACADEMIA CORTEX</h1>
+    <h2>Tabla de Combinación de Alimentos</h2>
+    <div class="food-buttons" id="foodButtons"></div>
+    <div id="multiResult"></div>
+    <div id="specificFoods"></div>
+    <div id="result"></div>
+
+    <script>
+        // El resto del código JavaScript permanece igual
+        const foods = [
+            "A - Frutas Ácidas", "B - Frutas Semiácidas", "C - Frutas Neutras", "D - Frutas Desecadas",
+            "E - Frutos Oleaginosos", "F - Ajos y Cebollas", "G - Verduras", "H - Hortalizas",
+            "I - Feculentos", "J - Cereales", "K - Legumbres y Brotes", "L - Huevos",
+            "M - Carnes y Pescados", "N - Limón", "O - Lácteos no Maternales", "P - Lácteos Maternales"
+        ];
+
+        const combinations = {
+            "A": {B:"mala",C:"buena",D:"mala",E:"mala",F:"mala",G:"buena",H:"mala",I:"mala",J:"mala",K:"buena",L:"mala",M:"mala",N:"buena",O:"mala",P:"mala"},
+            "B": {A:"mala",C:"buena",D:"regular",E:"regular",F:"mala",G:"buena",H:"mala",I:"mala",J:"mala",K:"buena",L:"mala",M:"regular",N:"buena",O:"mala",P:"mala"},
+            "C": {A:"buena",B:"buena",D:"buena",E:"buena",F:"mala",G:"buena",H:"buena",I:"mala",J:"regular",K:"buena",L:"mala",M:"mala",N:"buena",O:"mala",P:"mala"},
+            "D": {A:"mala",B:"regular",C:"buena",E:"buena",F:"mala",G:"buena",H:"mala",I:"mala",J:"regular",K:"buena",L:"mala",M:"mala",N:"buena",O:"mala",P:"mala"},
+            "E": {A:"mala",B:"regular",C:"buena",D:"buena",F:"mala",G:"buena",H:"buena",I:"regular",J:"mala",K:"buena",L:"mala",M:"mala",N:"buena",O:"mala",P:"mala"},
+            "F": {A:"mala",B:"mala",C:"mala",D:"mala",E:"mala",G:"buena",H:"mala",I:"buena",J:"mala",K:"mala",L:"mala",M:"mala",N:"mala",O:"mala",P:"mala"},
+            "G": {A:"buena",B:"buena",C:"buena",D:"buena",E:"buena",F:"buena",H:"buena",I:"buena",J:"buena",K:"buena",L:"buena",M:"buena",N:"buena",O:"buena",P:"buena"},
+            "H": {A:"mala",B:"mala",C:"buena",D:"mala",E:"buena",F:"mala",G:"buena",I:"mala",J:"buena",K:"buena",L:"buena",M:"buena",N:"buena",O:"mala",P:"mala"},
+            "I": {A:"mala",B:"mala",C:"mala",D:"mala",E:"regular",F:"buena",G:"buena",H:"mala",J:"buena",K:"buena",L:"buena",M:"buena",N:"buena",O:"mala",P:"mala"},
+            "J": {A:"mala",B:"mala",C:"regular",D:"regular",E:"mala",F:"mala",G:"buena",H:"buena",I:"buena",K:"buena",L:"buena",M:"buena",N:"buena",O:"mala",P:"mala"},
+            "K": {A:"buena",B:"buena",C:"buena",D:"buena",E:"buena",F:"mala",G:"buena",H:"buena",I:"buena",J:"buena",L:"buena",M:"buena",N:"buena",O:"mala",P:"mala"},
+            "L": {A:"mala",B:"mala",C:"mala",D:"mala",E:"mala",F:"mala",G:"buena",H:"buena",I:"buena",J:"buena",K:"buena",M:"buena",N:"buena",O:"mala",P:"mala"},
+            "M": {A:"mala",B:"regular",C:"mala",D:"mala",E:"mala",F:"mala",G:"buena",H:"buena",I:"buena",J:"buena",K:"buena",L:"buena",N:"buena",O:"mala",P:"mala"},
+            "N": {A:"buena",B:"buena",C:"buena",D:"buena",E:"buena",F:"mala",G:"buena",H:"buena",I:"buena",J:"buena",K:"buena",L:"buena",M:"buena",O:"mala",P:"mala"},
+            "O": {A:"mala",B:"mala",C:"mala",D:"mala",E:"mala",F:"mala",G:"buena",H:"mala",I:"mala",J:"mala",K:"mala",L:"mala",M:"mala",N:"mala",P:"terrible"},
+            "P": {A:"mala",B:"mala",C:"mala",D:"mala",E:"mala",F:"mala",G:"buena",H:"mala",I:"mala",J:"mala",K:"mala",L:"mala",M:"mala",N:"mala",O:"terrible"}
+        };
+
+        const specificFoods = {
+            "A": ["Limón", "Naranja", "Mandarina", "Pomelo", "Piña (Ananá)", "Frutilla (Fresa)", "Kiwi", "Manzana Verde"],
+            "B": ["Manzana Roja", "Pera", "Ciruela", "Durazno (Melocotón)", "Uva", "Cereza", "Frambuesa", "Mora"],
+            "C": ["Plátano (Banana)", "Papaya", "Mango", "Melón", "Sandía (Patilla)", "Higo"],
+            "D": ["Pasas de uva", "Dátiles", "Ciruelas pasas", "Higos secos", "Albaricoques secos", "Arándanos secos"],
+            "E": ["Almendras", "Nueces", "Avellanas", "Pistachos", "Anacardos (Castañas de cajú)", "Semillas de girasol", "Semillas de calabaza"],
+            "F": ["Ajo", "Cebolla", "Cebolla morada", "Puerro", "Chalota"],
+            "G": ["Zanahoria", "Brócoli", "Coliflor", "Espinaca", "Espárragos", "Calabacín (Zucchini)", "Pimiento (Morrón)"],
+            "H": ["Tomate", "Pepino", "Lechuga", "Apio", "Rábano", "Berenjena"],
+            "I": ["Papa (Patata)", "Batata (Camote)", "Yuca (Mandioca)", "Ñame"],
+            "J": ["Trigo", "Arroz", "Maíz", "Avena", "Cebada", "Quinoa", "Mijo"],
+            "K": ["Lentejas", "Garbanzos", "Alubias (Frijoles)", "Guisantes (Chícharos)", "Soja", "Brotes de alfalfa", "Brotes de soja"],
+            "L": ["Huevos de gallina", "Huevos de codorniz"],
+            "M": ["Pollo", "Ternera (Carne de res)", "Cerdo", "Cordero", "Salmón", "Atún", "Bacalao", "Merluza"],
+            "N": ["Limón"],
+            "O": ["Leche de vaca", "Queso", "Yogur", "Mantequilla", "Crema (Nata)"],
+            "P": ["Leche materna (humana)"]
+        };
+
+        let selectedFoods = [];
+
+        function createButtons() {
+            const buttonContainer = document.getElementById('foodButtons');
+            foods.forEach(food => {
+                const button = document.createElement('button');
+                button.textContent = food.split(' - ')[1];
+                button.onclick = () => toggleFood(food[0], button);
+                buttonContainer.appendChild(button);
+            });
+        }
+
+        function toggleFood(food, button) {
+            const index = selectedFoods.indexOf(food);
+            if (index > -1) {
+                selectedFoods.splice(index, 1);
+                button.classList.remove('selected');
+            } else {
+                selectedFoods.push(food);
+                button.classList.add('selected');
+            }
+            updateMultiResult();
+            updateSpecificFoods();
+        }
+
+        function updateMultiResult() {
+            const multiResultDiv = document.getElementById('multiResult');
+            if (selectedFoods.length < 2) {
+                multiResultDiv.innerHTML = '<p>Seleccione al menos dos alimentos para ver su combinación.</p>';
+                return;
+            }
+
+            let overallResult = 'buena';
+            let resultText = '<h2>Resultado de la combinación:</h2>';
+
+            for (let i = 0; i < selectedFoods.length; i++) {
+                for (let j = i + 1; j < selectedFoods.length; j++) {
+                    const food1 = selectedFoods[i];
+                    const food2 = selectedFoods[j];
+                    const combination = combinations[food1][food2] || combinations[food2][food1];
+                    
+                    resultText += `<div class="combination ${combination}">${foods.find(f => f.startsWith(food1))} + ${foods.find(f => f.startsWith(food2))}: ${combination}</div>`;
+                    
+                    if (combination === 'mala' && overallResult !== 'terrible') {
+                        overallResult = 'mala';
+                    } else if (combination === 'terrible') {
+                        overallResult = 'terrible';
+                    } else if (combination === 'regular' && overallResult === 'buena') {
+                        overallResult = 'regular';
+                    }
+                }
+            }
+
+            resultText += `<div class="combination ${overallResult}"><strong>Resultado general: ${overallResult}</strong></div>`;
+            multiResultDiv.innerHTML = resultText;
+        }
+
+        function updateSpecificFoods() {
+            const specificFoodsDiv = document.getElementById('specificFoods');
+            if (selectedFoods.length === 0) {
+                specificFoodsDiv.innerHTML = '';
+                return;
+            }
+
+            let foodListHTML = '<h2>Alimentos específicos seleccionados:</h2>';
+            selectedFoods.forEach(food => {
+                const foodName = foods.find(f => f.startsWith(food)).split(' - ')[1];
+                foodListHTML += `<h3>${foodName}</h3><div class="food-list"><ul>`;
+                specificFoods[food].forEach(item => {
+                    foodListHTML += `<li>${item}</li>`;
+                });
+                foodListHTML += '</ul></div>';
+            });
+
+            specificFoodsDiv.innerHTML = foodListHTML;
+        }
+
+        function showCombinations(food) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>Combinaciones para ${foods.find(f => f.startsWith(food))}</h2>`;
+            
+            Object.entries(combinations[food]).forEach(([key, value]) => {
+                const combinationDiv = document.createElement('div');
+                combinationDiv.className = `combination ${value}`;
+                combinationDiv.textContent = `${foods.find(f => f.startsWith(key))}: ${value}`;
+                resultDiv.appendChild(combinationDiv);
+            });
+        }
+
+        createButtons();
+    </script>
+</body>
+</html>
